@@ -1,0 +1,33 @@
+Backend Requirements (Node.js)
+
+This project uses Node.js and npm.
+Dependencies are installed using package.json.
+
+--------------------------------
+Required Software
+--------------------------------
+- Node.js (LTS, v18 or later)
+- npm (comes with Node.js)
+
+--------------------------------
+Main Backend Libraries
+--------------------------------
+express            - Web framework for REST APIs
+prisma             - ORM for database access
+@prisma/client     - Prisma database client
+sqlite3            - SQLite database driver
+zod                - Request & data validation
+dotenv             - Environment variable handling
+cors               - Cross-Origin Resource Sharing
+
+--------------------------------
+Installation Command
+--------------------------------
+npm install
+
+--------------------------------
+Notes
+--------------------------------
+- This file is for documentation only
+- Actual dependency versions are defined in package.json
+- SQLite is used for v1 (no DB server required)

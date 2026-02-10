@@ -1,0 +1,33 @@
+Frontend Requirements (React + Vite)
+
+This project uses React with Vite.
+Dependencies are installed using package.json.
+
+--------------------------------
+Required Software
+--------------------------------
+- Node.js (LTS, v18 or later)
+- npm (comes with Node.js)
+- Modern web browser
+
+--------------------------------
+Main Frontend Libraries
+--------------------------------
+react               - UI library
+react-dom           - DOM rendering
+react-router-dom    - Client-side routing
+axios               - HTTP client
+tailwindcss         - Utility-first CSS framework
+vite                - Frontend build tool
+
+--------------------------------
+Installation Command
+--------------------------------
+npm install
+
+--------------------------------
+Notes
+--------------------------------
+- This file is for documentation only
+- Actual dependency versions are defined in package.json
+- Tailwind CSS is configured during frontend setup

@@ -1,0 +1,55 @@
+{
+  "domain": "Computer Science",
+  "questions": [
+    {
+      "text": "What does CPU stand for?",
+      "options": [
+        "Central Processing Unit",
+        "Computer Personal Unit",
+        "Central Performance Utility",
+        "Control Processing Unit"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "text": "Which data structure uses FIFO?",
+      "options": [
+        "Stack",
+        "Queue",
+        "Tree",
+        "Graph"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "text": "Which language is primarily used for web styling?",
+      "options": [
+        "HTML",
+        "JavaScript",
+        "CSS",
+        "Python"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "text": "What is the time complexity of binary search?",
+      "options": [
+        "O(n)",
+        "O(log n)",
+        "O(n log n)",
+        "O(1)"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "text": "Which is NOT an operating system?",
+      "options": [
+        "Linux",
+        "Windows",
+        "Oracle",
+        "macOS"
+      ],
+      "correctIndex": 2
+    }
+  ]
+}
