@@ -58,10 +58,12 @@ export default function AttemptQuiz({
       const userAnswer = answers[i];
 
       if (type === "mcq" || type === "image") {
-        const correctIndex =
-          q.correctIndex !== undefined
-            ? q.correctIndex
-            : q.correctAnswers?.[0];
+       const correctIndex =
+  q.correctIndex !== undefined
+    ? q.correctIndex
+    : Array.isArray(q.correctAnswers)
+      ? q.correctAnswers[0]
+      : undefined;
 
         if (userAnswer === correctIndex) correct++;
       }
@@ -229,7 +231,12 @@ export default function AttemptQuiz({
 
           {(type === "mcq" || type === "image") && (
             <>
-              <div style={styles.optionsLabel}>Options</div>
+              <div style={styles.optionsHeader}>
+  <div style={styles.optionsLabel}>Options</div>
+  <div style={styles.questionTypeBadge}>
+    {type.toUpperCase()}
+  </div>
+</div>
               <div style={styles.optionsWrapper}>
                 {q.options.map((opt, oi) => {
                   const optionText =
@@ -268,7 +275,12 @@ export default function AttemptQuiz({
 
           {type === "msq" && (
             <>
-              <div style={styles.optionsLabel}>Options</div>
+              <div style={styles.optionsHeader}>
+  <div style={styles.optionsLabel}>Options</div>
+  <div style={styles.questionTypeBadge}>
+    {type.toUpperCase()}
+  </div>
+</div>
               <div style={styles.optionsWrapper}>
                 {q.options.map((opt, oi) => {
                   const optionText =
@@ -317,30 +329,39 @@ export default function AttemptQuiz({
             </>
           )}
 
-          {type === "text" && (
-            <input
-              type="text"
-              placeholder="Enter your answer"
-              value={answers[qi] || ""}
-              onChange={(e) =>
-                setAnswers({
-                  ...answers,
-                  [qi]: e.target.value
-                })
-              }
-              style={{
-                padding: "12px",
-                borderRadius: "12px",
-                border:
-                  "1px solid rgba(255,255,255,0.25)",
-                background:
-                  "rgba(255,255,255,0.08)",
-                color: "white",
-                width: "100%",
-                marginTop: "10px"
-              }}
-            />
-          )}
+{type === "text" && (
+  <>
+    <div style={styles.optionsHeader}>
+      <div />
+      <div style={styles.questionTypeBadge}>
+        TEXT
+      </div>
+    </div>
+
+    <input
+      type="text"
+      placeholder="Enter your answer"
+      value={answers[qi] || ""}
+      onChange={(e) =>
+        setAnswers({
+          ...answers,
+          [qi]: e.target.value
+        })
+      }
+      style={{
+        padding: "12px",
+        borderRadius: "12px",
+        border:
+          "1px solid rgba(255,255,255,0.25)",
+        background:
+          "rgba(255,255,255,0.08)",
+        color: "white",
+        width: "100%",
+        marginTop: "10px"
+      }}
+    />
+  </>
+)}
         </div>
       );
     })}
@@ -509,5 +530,23 @@ optionsLabel: {
   score: {
     fontSize: "1.2rem",
     marginTop: "16px"
-  }
+  },
+  optionsHeader: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "10px",
+  marginTop: "10px"
+},
+
+questionTypeBadge: {
+  fontSize: "0.75rem",
+  letterSpacing: "1px",
+  padding: "4px 10px",
+  borderRadius: "20px",
+  background: "rgba(32, 17, 79, 0.2)",
+  border: "1px solid rgba(167, 139, 250, 0.6)",
+  color: "#d2c3c3",
+  fontWeight: "600"
+}
 };
