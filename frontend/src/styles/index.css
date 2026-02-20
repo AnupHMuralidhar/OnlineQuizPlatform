@@ -1,6 +1,358 @@
+/* =========================
+   GLOBAL RESET
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+/* =========================
+   GLOBAL APP BACKGROUND
+========================= */
+
+body {
+  background: #0f0f1a;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Floating animated blobs for entire app */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  filter: blur(160px);
+  opacity: 0.55;
+  z-index: -1;
+}
+
+/* Purple blob */
+body::before {
+  background: #7c3aed;
+  top: -200px;
+  left: -200px;
+  animation: floatBlob1 22s infinite alternate ease-in-out;
+}
+
+/* Pink blob */
+body::after {
+  background: #ec4899;
+  bottom: -200px;
+  right: -200px;
+  animation: floatBlob2 26s infinite alternate ease-in-out;
+}
+
+@keyframes floatBlob1 {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(250px, 120px) scale(1.25); }
+}
+
+@keyframes floatBlob2 {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-250px, -150px) scale(1.3); }
+}
+
+
+/* =========================
+   SHARED GRADIENT BACKGROUND
+   (Used by Landing + Auth)
+========================= */
+.gradient-bg,
+.auth-page {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  background: linear-gradient(
+    -45deg,
+    #4e46e5de,
+    #7c3aeddd,
+    #bf33ead7,
+    #ec489acd
+  );
+
+  background-size: 400% 400%;
+  animation: gradientFlow 18s ease infinite;
+
+  position: relative;
+  color: white;
+}
+
+/* Soft animated glow */
+.gradient-bg::before,
+.auth-page::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: #ffffff10;
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: floatGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* =========================
+   LANDING PAGE
+========================= */
+.landing-container {
+  max-width: 900px;
+  text-align: center;
+  padding: 2rem;
+  z-index: 2;
+  animation: fadeUp 0.8s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landing-title {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ffffff, #e0e7ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.2rem;
+}
+
+.landing-description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  opacity: 0.85;
+  margin-bottom: 2.5rem;
+}
+
+.landing-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.landing-btn-primary {
+  padding: 14px 28px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  color: white;
+  transition: 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(167,139,250,0.45);
+}
+
+/* 🔥 UPDATED — Creator now highlighted too */
+.landing-btn-secondary {
+  padding: 14px 28px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  color: white;
+  transition: 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.landing-btn-secondary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(236,72,153,0.45);
+}
+
+
+/* =========================
+   AUTH CARD (UNCHANGED STYLE)
+========================= */
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 2.2rem 2rem;
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  animation: cardFade 0.6s ease;
+  z-index: 2;
+}
+
+@keyframes cardFade {
+  from { opacity: 0; transform: translateY(40px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* =========================
+   AUTH HEADER
+========================= */
+.auth-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(90deg, #ffffff, #e0e7ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-subtitle {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #e5e7eb;
+  opacity: 0.8;
+}
+
+/* =========================
+   AUTH INPUTS
+========================= */
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 15px;
+
+  transition: all 0.3s ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.auth-input:focus {
+  outline: none;
+  border: 1px solid #c4b5fd;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   AUTH BUTTON
+========================= */
+.auth-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  color: white;
+
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.auth-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================
+   AUTH SWITCH BUTTON
+========================= */
+.auth-switch {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 12px;
+  border-radius: 14px;
+  color: #e9d5ff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.auth-switch:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* =========================
+   AUTH MESSAGE
+========================= */
+.auth-message {
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-error {
+  background: rgba(255, 0, 0, 0.15);
+  color: #fecaca;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.auth-success {
+  background: rgba(0, 255, 150, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(0, 255, 150, 0.3);
+}
+
+/* =========================
+   MOBILE PERFECT FIT
+========================= */
+@media (max-height: 700px) {
+  .auth-card {
+    padding: 1.6rem;
+  }
+}
+/* Darker placeholder for quiz builder */
+input::placeholder,
+textarea::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Optional: stronger when inside glass cards */
+.create-quiz input::placeholder {
+  color: rgba(0, 0, 0, 0.7);
+}
+select option {
+  background: white;
+  color: #111827;
+}
+@keyframes dashboardGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

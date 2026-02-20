@@ -1,37 +1,91 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import CreateQuiz from "./pages/CreateQuiz";
-import AttemptQuiz from "./pages/AttemptQuiz";
-import Attempts from "./pages/Attempts";
+import Landing from "./pages/public/Landing";
+import Login from "./pages/public/Login";
+import Register from "./pages/public/Register";
+
+// Attempter
+import Dashboard from "./pages/attempter/Dashboard";
+import AttemptQuiz from "./pages/attempter/AttemptQuiz";
+import Attempts from "./pages/attempter/Attempts";
+
+// Creator
+import CreatorDashboard from "./pages/creator/CreatorDashboard";
+import CreateQuiz from "./pages/creator/CreateQuiz";
+import QuizAnalytics from "./pages/creator/QuizAnalytics";
+import MyQuizzes from "./pages/creator/MyQuizzes";
 
 import "./styles/index.css";
 
 function App() {
-  const [page, setPage] = useState("login");
+  const [page, setPage] = useState("landing");
   const [username, setUsername] = useState("");
+  const [role, setRole] = useState(null);
 
-  // ✅ shared navigation props (THIS is the fix)
+  // 🔥 NEW — track edit mode
+  const [editingQuizId, setEditingQuizId] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    const storedRole = localStorage.getItem("role");
+
+    if (storedUser && storedRole) {
+      setUsername(storedUser);
+      setRole(storedRole);
+      setPage("dashboard");
+    }
+  }, []);
+
   const navProps = {
     username,
-    onCreateQuiz: () => setPage("createQuiz"),
+    role,
+    onDashboard: () => {
+      setEditingQuizId(null);
+      setPage("dashboard");
+    },
+    onCreateQuiz: (quizId = null) => {
+      setEditingQuizId(quizId);   // 🔥 set edit mode if ID passed
+      setPage("createQuiz");
+    },
     onAttemptQuiz: () => setPage("attemptQuiz"),
     onViewAttempts: () => setPage("attempts"),
+    onMyQuizzes: () => {
+      setEditingQuizId(null);
+      setPage("myQuizzes");
+    },
     onLogout: () => {
+      localStorage.clear();
       setUsername("");
-      setPage("login");
+      setRole(null);
+      setEditingQuizId(null);
+      setPage("landing");
     }
   };
+
+  // -----------------------------
+  // PUBLIC PAGES
+  // -----------------------------
+
+  if (page === "landing") {
+    return (
+      <Landing
+        onSelectRole={(selectedRole) => {
+          setRole(selectedRole);
+          setPage("login");
+        }}
+      />
+    );
+  }
 
   if (page === "login") {
     return (
       <Login
+        role={role}
         onGoToRegister={() => setPage("register")}
-        onLoginSuccess={(name) => {
+        onLoginSuccess={(name, userRole) => {
           setUsername(name);
+          setRole(userRole);
           setPage("dashboard");
         }}
       />
@@ -39,23 +93,69 @@ function App() {
   }
 
   if (page === "register") {
-    return <Register onGoToLogin={() => setPage("login")} />;
-  }
-
-  if (page === "dashboard") {
-    return <Dashboard {...navProps} />;
-  }
-
-  if (page === "createQuiz") {
     return (
-      <CreateQuiz
-        {...navProps}
-        onBack={() => setPage("dashboard")}
+      <Register
+        role={role}
+        onGoToLogin={() => setPage("login")}
       />
     );
   }
 
-  if (page === "attemptQuiz") {
+  // -----------------------------
+  // PROTECTED ROUTES
+  // -----------------------------
+
+  if (!username || !role) {
+    return (
+      <Landing
+        onSelectRole={(r) => {
+          setRole(r);
+          setPage("login");
+        }}
+      />
+    );
+  }
+
+  // -----------------------------
+  // DASHBOARD
+  // -----------------------------
+
+  if (page === "dashboard") {
+    return role === "creator"
+      ? <CreatorDashboard {...navProps} />
+      : <Dashboard {...navProps} />;
+  }
+
+  // -----------------------------
+  // CREATOR ROUTES
+  // -----------------------------
+
+  if (page === "myQuizzes" && role === "creator") {
+    return <MyQuizzes {...navProps} />;
+  }
+
+  if (page === "createQuiz" && role === "creator") {
+    return (
+      <CreateQuiz
+        {...navProps}
+        editingQuizId={editingQuizId}   // 🔥 PASS ID
+        onBack={() => {
+          setEditingQuizId(null);
+          setPage("myQuizzes");
+        }}
+      />
+    );
+  }
+
+  if (page === "attempts" && role === "creator") {
+    return <QuizAnalytics {...navProps} />;
+  }
+
+  // -----------------------------
+  // ATTEMPTER ROUTES
+  // -----------------------------
+
+  if (page === "attemptQuiz" && role === "attempter") {
     return (
       <AttemptQuiz
         {...navProps}
@@ -64,7 +164,7 @@ function App() {
     );
   }
 
-  if (page === "attempts") {
+  if (page === "attempts" && role === "attempter") {
     return <Attempts {...navProps} />;
   }
 
