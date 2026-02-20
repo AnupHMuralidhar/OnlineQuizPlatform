@@ -10,10 +10,7 @@ function normalizeQuestions(questions = []) {
     difficulty: q.difficulty || "medium",
     options: (q.options || []).map(opt => {
       if (typeof opt === "string") {
-        return {
-          text: opt,
-          image: null
-        };
+        return { text: opt, image: null };
       }
 
       return {
@@ -31,7 +28,6 @@ function calculateScore(questions, answers) {
 
   questions.forEach((q, index) => {
     const userAnswer = answers[index];
-
     if (!q.correctAnswers) return;
 
     if (q.type === "mcq" || q.type === "image") {
@@ -77,7 +73,7 @@ function saveAttempt(data) {
 
   const finalAttempt = {
     username: data.username,
-    quizId: data.quizId,
+    quizId: data.quizId ?? null, // 🔥 important
     quizTitle: data.quizTitle,
     questions: normalizedQuestions,
     answers: data.answers,
@@ -90,47 +86,46 @@ function saveAttempt(data) {
   return finalAttempt;
 }
 
-/* 🔥 IMPORTANT UPDATE STARTS HERE */
+/* 🔥 Hydration Logic */
 
-/* 
-   When fetching attempts:
-   - Remove attempts if quiz no longer exists
-   - Replace stored questions with latest quiz questions
-   - Update title if changed
-*/
 function hydrateAttempt(attempt) {
+
+  // 🔥 DOMAIN QUIZ (no quizId)
+  if (!attempt.quizId) {
+    return attempt; // keep stored version as-is
+  }
+
   const liveQuiz = quizRepository.findById(attempt.quizId);
 
-  // 🔥 If quiz deleted → do not show this attempt
+  // 🔥 If creator quiz deleted → remove attempt
   if (!liveQuiz) return null;
 
   return {
     ...attempt,
-    quizTitle: liveQuiz.title,     // 🔥 reflect updated title
-    questions: liveQuiz.questions  // 🔥 reflect updated questions/options/images
+    quizTitle: liveQuiz.title,
+    questions: liveQuiz.questions,
+    score: calculateScore(liveQuiz.questions, attempt.answers),
+    total: liveQuiz.questions.length
   };
 }
 
 function getAllAttempts() {
-  const attempts = repository.findAll();
-
-  return attempts
+  return repository
+    .findAll()
     .map(hydrateAttempt)
-    .filter(Boolean); // remove deleted quiz attempts
+    .filter(Boolean);
 }
 
 function getAttemptsByUser(username) {
-  const attempts = repository.findByUser(username);
-
-  return attempts
+  return repository
+    .findByUser(username)
     .map(hydrateAttempt)
     .filter(Boolean);
 }
 
 function getAttemptsByQuiz(quizTitle) {
-  const attempts = repository.findByQuiz(quizTitle);
-
-  return attempts
+  return repository
+    .findByQuiz(quizTitle)
     .map(hydrateAttempt)
     .filter(Boolean);
 }
