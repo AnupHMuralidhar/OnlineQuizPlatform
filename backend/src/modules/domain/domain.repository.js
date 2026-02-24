@@ -7,6 +7,10 @@ const DOMAIN_PATH = path.join(
 );
 
 function getDomainFiles() {
+  if (!fs.existsSync(DOMAIN_PATH)) {
+    return [];
+  }
+
   return fs.readdirSync(DOMAIN_PATH);
 }
 
