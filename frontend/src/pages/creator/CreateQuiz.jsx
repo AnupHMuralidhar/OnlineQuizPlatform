@@ -14,6 +14,7 @@ export default function CreateQuiz({
   const role = "creator";
 
   const [title, setTitle] = useState("");
+  const [difficulty, setDifficulty] = useState("medium");   // 🔥 NEW
   const [questions, setQuestions] = useState([
     createNewQuestion()
   ]);
@@ -31,40 +32,27 @@ export default function CreateQuiz({
     };
   }
 
-function transformQuestion(q) {
-  const formatPath = (img) => {
-    if (!img) return null;
+  function transformQuestion(q) {
+    const formatPath = (img) => {
+      if (!img) return null;
+      if (img.startsWith("http")) return img;
+      const cleanPath = img.startsWith("/") ? img : `/${img}`;
+      return `http://localhost:5000${cleanPath}`;
+    };
 
-    // If already full URL
-    if (img.startsWith("http")) return img;
-
-    // Ensure it starts with /
-    const cleanPath = img.startsWith("/")
-      ? img
-      : `/${img}`;
-
-    return `http://localhost:5000${cleanPath}`;
-  };
-
-  return {
-    type: q.type || "mcq",
-    text: q.text || "",
-
-    // 🔥 FIXED
-    imageFile: formatPath(q.image),
-
-    options: (q.options || []).map(opt =>
-      typeof opt === "string" ? opt : opt.text || ""
-    ),
-
-    // 🔥 FIXED
-    optionImages: (q.options || []).map(opt =>
-      formatPath(opt.image)
-    ),
-
-    correctAnswers: q.correctAnswers || []
-  };
-}
+    return {
+      type: q.type || "mcq",
+      text: q.text || "",
+      imageFile: formatPath(q.image),
+      options: (q.options || []).map(opt =>
+        typeof opt === "string" ? opt : opt.text || ""
+      ),
+      optionImages: (q.options || []).map(opt =>
+        formatPath(opt.image)
+      ),
+      correctAnswers: q.correctAnswers || []
+    };
+  }
 
   useEffect(() => {
     if (!editingQuizId) return;
@@ -73,6 +61,7 @@ function transformQuestion(q) {
       .then(res => res.json())
       .then(data => {
         setTitle(data.title || "");
+        setDifficulty(data.difficulty || "medium");   // 🔥 LOAD difficulty
         setQuestions(
           data.questions
             ? data.questions.map(transformQuestion)
@@ -157,12 +146,14 @@ function transformQuestion(q) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
+          difficulty,   // 🔥 SEND difficulty
           questions,
           createdBy: username
         })
       });
 
       setTitle("");
+      setDifficulty("medium");   // 🔥 reset difficulty
       setQuestions([createNewQuestion()]);
       onBack();
     } catch {
@@ -193,6 +184,32 @@ function transformQuestion(q) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
+
+      {/* 🔥 DIFFICULTY SELECTOR */}
+      <div style={styles.difficultyWrapper}>
+        <span style={styles.difficultyLabel}>
+          Choose Difficulty
+        </span>
+
+        <div style={styles.difficultyOptions}>
+          {["easy", "medium", "hard"].map(level => (
+            <div
+              key={level}
+              style={{
+                ...styles.difficultyOption,
+                ...(difficulty === level
+                  ? styles.difficultySelected
+                  : {})
+              }}
+              onClick={() => setDifficulty(level)}
+            >
+              {level.charAt(0).toUpperCase() + level.slice(1)}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ⬇️ REST OF YOUR FILE REMAINS UNCHANGED */}
 
       {questions.map((q, qi) => (
         <div key={qi} style={styles.card}>
@@ -475,6 +492,38 @@ optionTopRow: {
   gap: "12px",
   width: "100%"
 },
+difficultyWrapper: {
+  marginBottom: "24px"
+},
+
+difficultyLabel: {
+  display: "block",
+  marginBottom: "10px",
+  fontWeight: "600",
+  opacity: 0.9
+},
+
+difficultyOptions: {
+  display: "flex",
+  gap: "12px"
+},
+
+difficultyOption: {
+  padding: "8px 16px",
+  borderRadius: "20px",
+  border: "1px solid rgba(250, 139, 161, 0.35)",
+  background: "rgba(228, 228, 230, 0.15)",
+  color: "#070707",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  textTransform: "capitalize"
+},
+
+difficultySelected: {
+  background: "linear-gradient(135deg, #7661b7, #d89235)",
+  color: "white",
+  boxShadow: "0 0 15px rgba(167,139,250,0.5)"
+},
 
 smallOptionPreview: {
   width: "160px",
@@ -612,10 +661,6 @@ imageUploadText: {
   opacity: 0.7
 },
 
-imagePreview: {
-  maxWidth: "100%",
-  borderRadius: "12px"
-},
 
 questionControls: {
   display: "flex",
