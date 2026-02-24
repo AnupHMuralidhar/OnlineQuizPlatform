@@ -49,12 +49,18 @@ export default function QuizAnalytics({
       ).toFixed(2)
     : 0;
 
-    const formatImage = (img) => {
-  if (!img) return null;
-  if (img.startsWith("http")) return img;
-  const clean = img.startsWith("/") ? img : `/${img}`;
-  return `http://localhost:5000${clean}`;
-};
+  const formatImage = (img) => {
+    if (!img) return null;
+    if (img.startsWith("http")) return img;
+    const clean = img.startsWith("/") ? img : `/${img}`;
+    return `http://localhost:5000${clean}`;
+  };
+
+  const getDifficultyStyle = (level) => {
+    if (level === "easy") return styles.easyBadge;
+    if (level === "hard") return styles.hardBadge;
+    return styles.mediumBadge;
+  };
 
   return (
     <DashboardLayout
@@ -70,187 +76,185 @@ export default function QuizAnalytics({
         />
       }
     >
-      {/* ===================== */}
-      {/* QUIZ OVERVIEW SCREEN  */}
-      {/* ===================== */}
+
+{/* ===================== OVERVIEW ===================== */}
 
 {!selectedQuiz && (
-  <>
-    <h2 style={styles.title}>Analytics Overview</h2>
+<>
+<h2 style={styles.title}>Analytics Overview</h2>
 
-    <div style={styles.grid}>
-      {quizzes.map((quiz) => {
-        const quizAttempts = attempts.filter(
-          a => a.quizId === quiz.id
-        );
+<div style={styles.grid}>
+{quizzes.map((quiz) => {
 
-        const totalAttempts = quizAttempts.length;
+const quizAttempts = attempts.filter(
+a => a.quizId === quiz.id
+);
 
-        const avg =
-          totalAttempts > 0
-            ? (
-                quizAttempts.reduce(
-                  (sum, a) => sum + a.score,
-                  0
-                ) / totalAttempts
-              ).toFixed(2)
-            : 0;
+const totalAttempts = quizAttempts.length;
 
-        const uniqueUsers = [
-          ...new Set(
-            quizAttempts.map(a => a.username)
-          )
-        ];
+const avg =
+totalAttempts > 0
+? (
+quizAttempts.reduce(
+(sum, a) => sum + a.score,
+0
+) / totalAttempts
+).toFixed(2)
+: 0;
 
-        return (
-          <div
-            key={quiz.id}
-            style={{
-              ...styles.analyticsCard,
-              ...(hoveredCard === quiz.id &&
-                styles.cardHover)
-            }}
-            onMouseEnter={() =>
-              setHoveredCard(quiz.id)
-            }
-            onMouseLeave={() =>
-              setHoveredCard(null)
-            }
-            onClick={() => {
-              setSelectedQuiz(quiz);
-              setSelectedAttempt(null);
-            }}
-          >
-            <h3 style={styles.quizTitle}>
-              {quiz.title}
-            </h3>
+const uniqueUsers = [
+...new Set(
+quizAttempts.map(a => a.username)
+)
+];
 
-            <div style={styles.analyticsStats}>
-              {/* QUESTIONS */}
-              <div style={styles.statBox}>
-                <span style={styles.statNumberQuestions}>
-                  {quiz.questions?.length || 0}
-                </span>
-                <span style={styles.statLabel}>
-                  Questions
-                </span>
-              </div>
+return (
+<div
+key={quiz.id}
+style={{
+...styles.analyticsCard,
+...(hoveredCard === quiz.id &&
+styles.cardHover)
+}}
+onMouseEnter={() =>
+setHoveredCard(quiz.id)
+}
+onMouseLeave={() =>
+setHoveredCard(null)
+}
+onClick={() => {
+setSelectedQuiz(quiz);
+setSelectedAttempt(null);
+}}
+>
+<h3 style={styles.quizTitle}>
+{quiz.title}
+</h3>
 
-              {/* ATTEMPTS */}
-              <div style={styles.statBox}>
-                <span style={styles.statNumberAttempts}>
-                  {totalAttempts}
-                </span>
-                <span style={styles.statLabel}>
-                  Attempts
-                </span>
-              </div>
+<div style={styles.analyticsStats}>
+<div style={styles.statBox}>
+<span style={styles.statNumberQuestions}>
+{quiz.questions?.length || 0}
+</span>
+<span style={styles.statLabel}>
+Questions
+</span>
+</div>
 
-              {/* AVG SCORE */}
-              <div style={styles.statBox}>
-                <span style={styles.statNumberAverage}>
-                  {avg}
-                </span>
-                <span style={styles.statLabel}>
-                  Avg Score
-                </span>
-              </div>
-            </div>
+<div style={styles.statBox}>
+<span style={styles.statNumberAttempts}>
+{totalAttempts}
+</span>
+<span style={styles.statLabel}>
+Attempts
+</span>
+</div>
+
+<div style={styles.statBox}>
+<span style={styles.statNumberAverage}>
+{avg}
+</span>
+<span style={styles.statLabel}>
+Avg Score
+</span>
+</div>
+</div>
 
 {uniqueUsers.length > 0 && (
-  <div style={styles.userSection}>
-    <span style={styles.userLabel}>Users:</span>
-
-    <div style={styles.userList}>
-      {uniqueUsers.map((u, i) => (
-        <span key={i} style={styles.userBadge}>
-          {u}
-        </span>
-      ))}
-    </div>
-  </div>
+<div style={styles.userSection}>
+<span style={styles.userLabel}>Users:</span>
+<div style={styles.userList}>
+{uniqueUsers.map((u, i) => (
+<span key={i} style={styles.userBadge}>
+{u}
+</span>
+))}
+</div>
+</div>
 )}
 
-          </div>
-        );
-      })}
-    </div>
-  </>
+</div>
+);
+})}
+</div>
+</>
 )}
 
+{/* ===================== QUIZ DETAILS ===================== */}
 
-      {/* ===================== */}
-      {/* QUIZ DETAILS SCREEN  */}
-      {/* ===================== */}
+{selectedQuiz && !selectedAttempt && (
+<>
+<button
+style={{
+...styles.backBtn,
+...(hoveredBack && styles.backHover)
+}}
+onMouseEnter={() => setHoveredBack(true)}
+onMouseLeave={() => setHoveredBack(false)}
+onClick={() => setSelectedQuiz(null)}
+>
+← Back
+</button>
 
-      {selectedQuiz && !selectedAttempt && (
-        <>
-          <button
-            style={{
-              ...styles.backBtn,
-              ...(hoveredBack && styles.backHover)
-            }}
-            onMouseEnter={() =>
-              setHoveredBack(true)
-            }
-            onMouseLeave={() =>
-              setHoveredBack(false)
-            }
-            onClick={() => setSelectedQuiz(null)}
-          >
-            ← Back
-          </button>
+<h2 style={styles.title}>
+{selectedQuiz.title}
+</h2>
 
-          <h2 style={styles.title}>
-            {selectedQuiz.title}
-          </h2>
+{/* 🔥 ONLY PLACE DIFFICULTY IS SHOWN */}
+<div
+style={{
+...styles.difficultyBadge,
+...getDifficultyStyle(selectedQuiz.difficulty)
+}}
+>
+Difficulty: {selectedQuiz.difficulty}
+</div>
 
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryCard}>
-              Total Attempts: {quizAttempts.length}
-            </div>
-            <div style={styles.summaryCard}>
-              Average Score: {averageScore}
-            </div>
-          </div>
+<div style={styles.summaryRow}>
+<div style={styles.summaryCard}>
+Total Attempts: {quizAttempts.length}
+</div>
+<div style={styles.summaryCard}>
+Average Score: {averageScore}
+</div>
+</div>
 
-          {quizAttempts.map((attempt, index) => (
-            <div
-              key={index}
-              style={{
-                ...styles.attemptCard,
-                ...(hoveredAttempt === index &&
-                  styles.cardHover)
-              }}
-              onMouseEnter={() =>
-                setHoveredAttempt(index)
-              }
-              onMouseLeave={() =>
-                setHoveredAttempt(null)
-              }
-              onClick={() =>
-                setSelectedAttempt(attempt)
-              }
-            >
-              <div>
-                <h4 style={styles.attemptUser}>
-                  {attempt.username}
-                </h4>
-                <p style={styles.time}>
-                  {new Date(
-                    attempt.timestamp
-                  ).toLocaleString()}
-                </p>
-              </div>
+{quizAttempts.map((attempt, index) => (
+<div
+key={index}
+style={{
+...styles.attemptCard,
+...(hoveredAttempt === index &&
+styles.cardHover)
+}}
+onMouseEnter={() =>
+setHoveredAttempt(index)
+}
+onMouseLeave={() =>
+setHoveredAttempt(null)
+}
+onClick={() =>
+setSelectedAttempt(attempt)
+}
+>
+<div>
+<h4 style={styles.attemptUser}>
+{attempt.username}
+</h4>
+<p style={styles.time}>
+{new Date(
+attempt.timestamp
+).toLocaleString()}
+</p>
+</div>
 
-              <div style={styles.attemptScore}>
-                {attempt.score}/{attempt.total}
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
+<div style={styles.attemptScore}>
+{attempt.score}/{attempt.total}
+</div>
+</div>
+))}
+</>
+)}
      {/* ===================== */}
 {/* FULL ATTEMPT VIEW    */}
 {/* ===================== */}
@@ -686,7 +690,29 @@ answerLabel: {
     fontWeight: 700,
     color: "#34d399"
   },
+difficultyBadge: {
+  display: "inline-block",
+  padding: "8px 16px",
+  borderRadius: "20px",
+  fontWeight: 600,
+  marginBottom: "20px",
+  fontSize: "0.9rem"
+},
 
+easyBadge: {
+  background: "linear-gradient(135deg,#22c55e,#16a34a)",
+  color: "white"
+},
+
+mediumBadge: {
+  background: "linear-gradient(135deg,#facc15,#f97316)",
+  color: "black"
+},
+
+hardBadge: {
+  background: "linear-gradient(135deg,#ef4444,#b91c1c)",
+  color: "white"
+},
   detailCard: {
     padding: "16px",
     borderRadius: "16px",
