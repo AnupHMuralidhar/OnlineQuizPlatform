@@ -1,18 +1,22 @@
 {
   "domain": "Aptitude",
+  "difficulty": "easy",
   "questions": [
     {
       "text": "If 5x = 20, what is x?",
+      "difficulty": "easy",
       "options": ["2", "3", "4", "5"],
       "correctIndex": 2
     },
     {
       "text": "What is 15% of 200?",
+      "difficulty": "easy",
       "options": ["25", "30", "35", "40"],
       "correctIndex": 1
     },
     {
       "text": "A train travels 60 km in 1 hour. Speed?",
+      "difficulty": "easy",
       "options": [
         "30 km/h",
         "40 km/h",
@@ -23,11 +27,13 @@
     },
     {
       "text": "What comes next: 2, 4, 8, 16, ?",
+      "difficulty": "easy",
       "options": ["18", "24", "32", "64"],
       "correctIndex": 2
     },
     {
       "text": "Simplify: 12 ÷ (3 × 2)",
+      "difficulty": "easy",
       "options": ["1", "2", "3", "4"],
       "correctIndex": 1
     }
