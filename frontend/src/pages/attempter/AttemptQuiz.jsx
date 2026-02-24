@@ -133,77 +133,90 @@ export default function AttemptQuiz({
       }
     >
 
-      {!selectedSource && (
-        <>
-          <h2 style={styles.title}>Select a Quiz</h2>
+{!selectedSource && (
+  <>
+    <h2 style={styles.title}>Select a Quiz</h2>
 
-          <h3 style={styles.sectionTitle}>Predefined Domains</h3>
-          <div style={styles.grid}>
-            {domains.map((d) => (
-              <div
-                key={d.key}
-                style={{
-                  ...styles.card,
-                  ...(hoveredCard === `domain-${d.key}` && styles.cardHover)
-                }}
-                onMouseEnter={() => setHoveredCard(`domain-${d.key}`)}
-                onMouseLeave={() => setHoveredCard(null)}
-                onClick={async () => {
-                  const res = await fetch(
-                    `http://localhost:5000/domains/${d.key}`
-                  );
-                  const data = await res.json();
+    <h3 style={styles.sectionTitle}>Predefined Domains</h3>
+    <div style={styles.grid}>
+      {domains.map((d) => (
+        <div
+          key={d.key}
+          style={{
+            ...styles.card,
+            ...(hoveredCard === `domain-${d.key}` && styles.cardHover)
+          }}
+          onMouseEnter={() => setHoveredCard(`domain-${d.key}`)}
+          onMouseLeave={() => setHoveredCard(null)}
+          onClick={async () => {
+            const res = await fetch(
+              `http://localhost:5000/domains/${d.key}`
+            );
+            const data = await res.json();
 
-                  setSelectedSource({
-                    title: data.domain,
-                    questions: data.questions
-                  });
+            setSelectedSource({
+              title: data.title,
+              questions: data.questions
+            });
 
-                  setAnswers({});
-                  setScore(null);
-                }}
-              >
-                <img
-                  src={getDomainImage(d.key)}
-                  alt={d.name}
-                  style={styles.image}
-                />
-                <p style={styles.cardTitle}>{d.name}</p>
-              </div>
-            ))}
-          </div>
+            setAnswers({});
+            setScore(null);
+          }}
+        >
+          <img
+            src={getDomainImage(d.key)}
+            alt={d.name}
+            style={styles.image}
+          />
 
-          <h3 style={styles.sectionTitle}>User Created Quizzes</h3>
-          <div style={styles.grid}>
-            {quizzes.map((q) => (
-              <div
-                key={q.id}
-                style={{
-                  ...styles.card,
-                  ...(hoveredCard === `quiz-${q.id}` && styles.cardHover)
-                }}
-                onMouseEnter={() => setHoveredCard(`quiz-${q.id}`)}
-                onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => {
-                  setSelectedSource(q);
-                  setAnswers({});
-                  setScore(null);
-                }}
-              >
-                <img
-                  src={userQuizImage}
-                  alt="User Quiz"
-                  style={styles.image}
-                />
-                <p style={styles.cardTitle}>{q.title}</p>
-                <p style={styles.creatorText}>
-                  Created by: {q.createdBy}
-                </p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+          <p style={styles.cardTitle}>{d.name}</p>
+
+          {/* 🔥 Added Difficulty */}
+          <p style={styles.difficultyText}>
+            EASY
+          </p>
+        </div>
+      ))}
+    </div>
+
+    <h3 style={styles.sectionTitle}>User Created Quizzes</h3>
+    <div style={styles.grid}>
+      {quizzes.map((q) => (
+        <div
+          key={q.id}
+          style={{
+            ...styles.card,
+            ...(hoveredCard === `quiz-${q.id}` && styles.cardHover)
+          }}
+          onMouseEnter={() => setHoveredCard(`quiz-${q.id}`)}
+          onMouseLeave={() => setHoveredCard(null)}
+          onClick={() => {
+            setSelectedSource(q);
+            setAnswers({});
+            setScore(null);
+          }}
+        >
+          <img
+            src={userQuizImage}
+            alt="User Quiz"
+            style={styles.image}
+          />
+
+          <p style={styles.cardTitle}>{q.title}</p>
+
+          {/* 🔥 Added Difficulty */}
+          <p style={styles.difficultyText}>
+            {(q.difficulty || "medium").toUpperCase()}
+          </p>
+
+          <p style={styles.creatorText}>
+            Created by: {q.createdBy}
+          </p>
+        </div>
+      ))}
+    </div>
+  </>
+)}
 
 {selectedSource && score === null && (
   <>
@@ -548,5 +561,15 @@ questionTypeBadge: {
   border: "1px solid rgba(167, 139, 250, 0.6)",
   color: "#d2c3c3",
   fontWeight: "600"
+},
+difficultyText: {
+  textAlign: "center",
+  fontSize: "0.75rem",
+  fontWeight: "700",
+  letterSpacing: "1px",
+  marginTop: "-6px",
+  marginBottom: "6px",
+  opacity: 0.85,
+  color: "#facc15"
 }
 };
