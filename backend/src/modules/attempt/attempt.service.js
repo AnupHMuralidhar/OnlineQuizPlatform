@@ -1,13 +1,14 @@
 const repository = require("./attempt.repository");
 const quizRepository = require("../quiz/quiz.repository");
+const domainRepository = require("../domain/domain.repository");
 
-/* 🔥 Normalize question structure before saving */
+/* Normalize questions */
 function normalizeQuestions(questions = []) {
   return questions.map(q => ({
     type: q.type || "mcq",
     text: q.text || "",
     image: q.image || null,
-    difficulty: q.difficulty || "medium",
+    difficulty: (q.difficulty || "easy").toString().toLowerCase(),
     options: (q.options || []).map(opt => {
       if (typeof opt === "string") {
         return { text: opt, image: null };
@@ -22,7 +23,7 @@ function normalizeQuestions(questions = []) {
   }));
 }
 
-/* 🔥 Smart Scoring Engine */
+/* Score */
 function calculateScore(questions, answers) {
   let score = 0;
 
@@ -34,36 +35,61 @@ function calculateScore(questions, answers) {
       if (
         userAnswer !== undefined &&
         q.correctAnswers.includes(userAnswer)
-      ) {
-        score++;
-      }
+      ) score++;
     }
 
     else if (q.type === "msq") {
       if (
         Array.isArray(userAnswer) &&
         JSON.stringify([...userAnswer].sort()) ===
-          JSON.stringify([...q.correctAnswers].sort())
-      ) {
-        score++;
-      }
+        JSON.stringify([...q.correctAnswers].sort())
+      ) score++;
     }
 
     else if (q.type === "text") {
       if (
         typeof userAnswer === "string" &&
         userAnswer.trim().toLowerCase() ===
-          (q.correctAnswers[0] || "").trim().toLowerCase()
-      ) {
-        score++;
-      }
+        (q.correctAnswers[0] || "").trim().toLowerCase()
+      ) score++;
     }
   });
 
   return score;
 }
 
+function normalizeDifficulty(value) {
+  if (!value) return "easy";
+  const normalized = value.toString().toLowerCase();
+  if (["easy", "medium", "hard"].includes(normalized)) {
+    return normalized;
+  }
+  return "easy";
+}
+
 function saveAttempt(data) {
+
+  let quizTitle = data.quizTitle;
+  let difficulty = data.difficulty;
+
+  // 🔥 USER CREATED QUIZ
+  if (typeof data.quizId === "number") {
+    const liveQuiz = quizRepository.findById(data.quizId);
+    if (liveQuiz) {
+      quizTitle = liveQuiz.title;
+      difficulty = liveQuiz.difficulty;
+    }
+  }
+
+  // 🔥 DOMAIN QUIZ
+  if (typeof data.quizId === "string") {
+    const domainData = domainRepository.readDomain(data.quizId);
+    if (domainData) {
+      quizTitle = domainData.domain;         // ✅ FORCE correct title
+      difficulty = domainData.difficulty;    // ✅ FORCE correct difficulty
+    }
+  }
+
   const normalizedQuestions = normalizeQuestions(data.questions);
 
   const calculatedScore = calculateScore(
@@ -73,8 +99,9 @@ function saveAttempt(data) {
 
   const finalAttempt = {
     username: data.username,
-    quizId: data.quizId ?? null, // 🔥 important
-    quizTitle: data.quizTitle,
+    quizId: data.quizId ?? null,
+    quizTitle: quizTitle || "Untitled Quiz",
+    difficulty: normalizeDifficulty(difficulty),
     questions: normalizedQuestions,
     answers: data.answers,
     score: calculatedScore,
@@ -86,48 +113,47 @@ function saveAttempt(data) {
   return finalAttempt;
 }
 
-/* 🔥 Hydration Logic */
-
+/* Hydration */
 function hydrateAttempt(attempt) {
 
-  // 🔥 DOMAIN QUIZ (no quizId)
-  if (!attempt.quizId) {
-    return attempt; // keep stored version as-is
+  if (typeof attempt.quizId === "number") {
+    const liveQuiz = quizRepository.findById(attempt.quizId);
+    if (!liveQuiz) return null;
+
+    return {
+      ...attempt,
+      quizTitle: liveQuiz.title,
+      difficulty: normalizeDifficulty(liveQuiz.difficulty),
+      questions: liveQuiz.questions,
+      score: calculateScore(liveQuiz.questions, attempt.answers),
+      total: liveQuiz.questions.length
+    };
   }
 
-  const liveQuiz = quizRepository.findById(attempt.quizId);
+  if (typeof attempt.quizId === "string") {
+    const domainData = domainRepository.readDomain(attempt.quizId);
+    if (domainData) {
+      return {
+        ...attempt,
+        quizTitle: domainData.domain,
+        difficulty: normalizeDifficulty(domainData.difficulty)
+      };
+    }
+  }
 
-  // 🔥 If creator quiz deleted → remove attempt
-  if (!liveQuiz) return null;
-
-  return {
-    ...attempt,
-    quizTitle: liveQuiz.title,
-    questions: liveQuiz.questions,
-    score: calculateScore(liveQuiz.questions, attempt.answers),
-    total: liveQuiz.questions.length
-  };
+  return attempt;
 }
 
 function getAllAttempts() {
-  return repository
-    .findAll()
-    .map(hydrateAttempt)
-    .filter(Boolean);
+  return repository.findAll().map(hydrateAttempt).filter(Boolean);
 }
 
 function getAttemptsByUser(username) {
-  return repository
-    .findByUser(username)
-    .map(hydrateAttempt)
-    .filter(Boolean);
+  return repository.findByUser(username).map(hydrateAttempt).filter(Boolean);
 }
 
 function getAttemptsByQuiz(quizTitle) {
-  return repository
-    .findByQuiz(quizTitle)
-    .map(hydrateAttempt)
-    .filter(Boolean);
+  return repository.findByQuiz(quizTitle).map(hydrateAttempt).filter(Boolean);
 }
 
 module.exports = {
