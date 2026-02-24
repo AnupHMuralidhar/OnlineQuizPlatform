@@ -34,7 +34,6 @@ export default function Attempts({
     return "mcq";
   };
 
-  // 🔥 image helper (same logic as AttemptQuiz)
   const formatImage = (img) => {
     if (!img) return null;
     if (img.startsWith("http")) return img;
@@ -104,7 +103,24 @@ export default function Attempts({
             </div>
 
             <div style={styles.card}>
-              <h3 style={styles.quizTitle}>{a.quizTitle}</h3>
+
+              {/* 🔥 NEW: Difficulty badge (TOP RIGHT) */}
+              <div
+                style={{
+                  ...styles.difficultyBadge,
+                  ...(a.difficulty === "easy"
+                    ? styles.easyBadge
+                    : a.difficulty === "hard"
+                    ? styles.hardBadge
+                    : styles.mediumBadge)
+                }}
+              >
+                {(a.difficulty || "easy").toUpperCase()}
+              </div>
+
+              <h3 style={styles.quizTitle}>
+                {a.quizTitle || "Untitled Quiz"}
+              </h3>
 
               <p style={styles.score}>
                 Score: {correctCount}/{totalScored}
@@ -124,7 +140,6 @@ export default function Attempts({
                       {qi + 1}. {q.text}
                     </p>
 
-                    {/* 🔥 QUESTION IMAGE */}
                     {q.image && (
                       <img
                         src={formatImage(q.image)}
@@ -133,14 +148,12 @@ export default function Attempts({
                       />
                     )}
 
-                    {/* TEXT */}
                     {type === "text" && (
                       <p>
                         Your Answer: {userAnswer || "Not answered"}
                       </p>
                     )}
 
-                    {/* MCQ + IMAGE */}
                     {(type === "mcq" || type === "image") && (() => {
                       const correctIndex =
                         q.correctIndex !== undefined
@@ -158,7 +171,6 @@ export default function Attempts({
 
                       return (
                         <>
-                          {/* USER ANSWER */}
                           {userOption && (
                             <>
                               <p style={isCorrect ? styles.correct : styles.wrong}>
@@ -179,7 +191,6 @@ export default function Attempts({
                             </>
                           )}
 
-                          {/* CORRECT ANSWER */}
                           {!isCorrect && correctOption && (
                             <>
                               <p style={styles.correct}>
@@ -203,7 +214,6 @@ export default function Attempts({
                       );
                     })()}
 
-                    {/* MSQ */}
                     {type === "msq" && (() => {
                       const correctAnswers =
                         q.correctAnswers || [];
@@ -373,5 +383,34 @@ optionImage: {
     color: "#fff",
     boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
     zIndex: 2                       // ← stays above everything
-  }
+  },
+  difficultyBadge: {
+  position: "absolute",
+  top: "18px",
+  right: "18px",
+  padding: "6px 14px",
+  borderRadius: "20px",
+  fontSize: "0.7rem",
+  fontWeight: "700",
+  letterSpacing: "1px",
+  backdropFilter: "blur(10px)"
+},
+
+easyBadge: {
+  background: "rgba(34,197,94,0.15)",
+  color: "#22c55e",
+  border: "1px solid #22c55e"
+},
+
+mediumBadge: {
+  background: "rgba(250,204,21,0.15)",
+  color: "#facc15",
+  border: "1px solid #facc15"
+},
+
+hardBadge: {
+  background: "rgba(239,68,68,0.15)",
+  color: "#ef4444",
+  border: "1px solid #ef4444"
+},
 };
